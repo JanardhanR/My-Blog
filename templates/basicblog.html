@@ -1,0 +1,36 @@
+{% extends "basetemplate.html" %}
+
+{% block content %}
+<div class="container">
+        <div>
+            <br>            
+            <br>
+            <br>
+        </div>
+        {%for blogitem in blogs%}
+        <header class="row">
+            <div class="col-md-9">
+                <h4 class="blog-title">{{blogitem.title}}</h4>
+            </div>
+            <div class="col-md-3">
+                <h4 class="blog-date ">{{blogitem.created}}</h4>
+            </div>
+        </header>
+        <div class="row">
+            <div class="col-md-12">
+                <hr>
+                <br>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <p class="blog-text clear-text">{{blogitem.blogtext}}</p>
+                <br>
+                <br>
+                <br>
+                <br>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% endblock %}

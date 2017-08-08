@@ -1,0 +1,88 @@
+body,
+div,
+ul,
+li,
+p,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  padding: 0;
+  margin: 0;
+  /* font-family: 'Spectral', serif;  */
+}
+
+body {
+  background-image: url(images/background.jpg);
+  background-size: cover;
+  color:white;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: fixed;
+}
+
+
+hr {
+  border: 0;
+  border-top: 1px solid #aaa;
+  padding: 0;
+  margin: 0;
+}
+
+.signupitems {
+  display: flex;
+}
+
+.blog-text {
+    display: inline-flex; 
+    /* font-family: 'Spectral', serif;  */
+}
+
+.text-primary {
+    text-align: center;
+    color: #999;
+    font-weight: bold;
+}
+
+.blog-date {
+  font-style: italic;
+  font-size: 16px;
+  color: #999;
+  line-height: 18px;
+  float: right;
+}
+/* 
+p:first-child:first-letter {
+    text-transform: capitalize ;
+} */
+
+.blog-title {
+    display: block;
+    text-transform: capitalize ;
+}
+
+.text-muted {
+    color: #BCBBBB;
+}
+
+.error {
+  font-weight: 600;
+  color:red;
+}
+
+.navbar .navbar-collapse {
+text-align: center;
+}
+
+.navbar {
+  background:  black; 
+  
+  border:none;
+  margin-bottom: 0px;
+}
+
+.navbar-default .navbar-nav>li>a{
+  /* color:#c4120f; */
+}
