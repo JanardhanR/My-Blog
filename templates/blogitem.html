@@ -1,10 +1,13 @@
-{% extends "basetemplate.html" %}
+{% extends "basetemplate.html" %} {% block content %}
+<div class="blogitem">
+    <h2>{{title}}</h2>
+    <hr>
+    <p class="blogitembody">{{blogtext}}</p>
+</div>
+<script>
+    window.setTimeout(function () {
+        window.location.href = "/blog";
+    }, 3000);
 
-{% block content %}
-    <div>
-        <h2>{{title}}</h2>
-        <hr>
-        <p>{{blogtext}}</p>
-    </div>
-</body>
+</script>
 {% endblock %}

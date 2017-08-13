@@ -1,17 +1,7 @@
-body,
-div,
-ul,
-li,
-p,
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+
+body,div,ul,li,p,h1,h2,h3,h4,h5,h6 {
   padding: 0;
   margin: 0;
-  /* font-family: 'Spectral', serif;  */
 }
 
 body {
@@ -23,6 +13,18 @@ body {
   background-attachment: fixed;
 }
 
+.brand {
+  font-size:26px; 
+  background-color:blue;  
+  color:white; 
+  font-family: 'Pacifico', cursive;
+}
+
+.error {
+  color:red;
+  padding: 5px;
+  font-weight: bold;
+}
 
 hr {
   border: 0;
@@ -33,43 +35,6 @@ hr {
 
 .signupitems {
   display: flex;
-}
-
-.blog-text {
-    display: inline-flex; 
-    /* font-family: 'Spectral', serif;  */
-}
-
-.text-primary {
-    text-align: center;
-    color: #999;
-    font-weight: bold;
-}
-
-.blog-date {
-  font-style: italic;
-  font-size: 16px;
-  color: #999;
-  line-height: 18px;
-  float: right;
-}
-/* 
-p:first-child:first-letter {
-    text-transform: capitalize ;
-} */
-
-.blog-title {
-    display: block;
-    text-transform: capitalize ;
-}
-
-.text-muted {
-    color: #BCBBBB;
-}
-
-.error {
-  font-weight: 600;
-  color:red;
 }
 
 .navbar .navbar-collapse {
@@ -83,6 +48,52 @@ text-align: center;
   margin-bottom: 0px;
 }
 
-.navbar-default .navbar-nav>li>a{
-  /* color:#c4120f; */
+.blog-text {
+    display: inline-flex; 
+    font-family: 'Spectral', serif;  
+    color: black;    
+}
+
+.blog-date {
+  font-style: italic;
+  font-size: 12px;
+  color: #999;
+  line-height: 12px;
+  float: right;
+}
+
+.blog-title {
+    display: block;
+    text-transform: capitalize ;
+    font-family: 'Spectral', serif;  
+}
+
+.blog {
+  margin-top: 100px;
+  margin-left: 30px; 
+  margin-right: 30px; 
+  background: grey;
+  color: black;
+}
+
+.blogitem {
+  background: white;
+  color: black;
+  border: 1px solid darkgrey;
+}
+
+.blogitemhead { 
+ margin: 20px;
+}
+.blogitembody {
+ padding: 5px;
+}
+
+.blogitemfooter {
+  padding: 20px; 
+  display: inline-flex; 
+}
+
+.newpost {
+  padding: 20px; 
 }

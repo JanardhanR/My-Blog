@@ -25,7 +25,6 @@ def users_key(group = 'default'):
     return db.Key.from_path('users', group)
 
 
-
 class User(db.Model):
     name = db.StringProperty(required = True)
     pw_hash = db.StringProperty(required = True)
@@ -57,11 +56,16 @@ class User(db.Model):
 class Blog(db.Model):
     title = db.StringProperty(required = True)
     blogtext = db.TextProperty(required = True)
-    created = db.DateTimeProperty(auto_now_add = True)   
-    
+    created = db.DateProperty(auto_now_add = True)   
+    likes = db.StringListProperty()
+    dislikes = db.StringListProperty()
+    # comments = db.StringListProperty()
+    author = db.StringProperty()
+
+
     @classmethod
     def get_all(cls):
-        return Blog.gql("order by created desc limit 10")
+        return Blog.gql("limit 30")
 
     @classmethod
     def delete_all(cls):

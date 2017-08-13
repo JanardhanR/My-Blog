@@ -1,36 +1,70 @@
-{% extends "basetemplate.html" %}
+{% extends "basetemplate.html" %} {% block headercontent %}
+<li><a href="/newpost">New Post</a></li>
+<li><a href="/logout">Logout [{{author}}]</a></li>
+{% endblock %} {% block content %}
 
-{% block content %}
-<div class="container">
-        <div>
-            <br>            
-            <br>
-            <br>
-        </div>
-        {%for blogitem in blogs%}
-        <header class="row">
+<div class="blog">
+    {%for blogitem in blogs%}
+    <div class="container blogitem ">
+        <header class="row blogitemhead">
             <div class="col-md-9">
                 <h4 class="blog-title">{{blogitem.title}}</h4>
             </div>
-            <div class="col-md-3">
-                <h4 class="blog-date ">{{blogitem.created}}</h4>
-            </div>
         </header>
-        <div class="row">
-            <div class="col-md-12">
-                <hr>
-                <br>
+        <div class="row blogitembody">
+            <div class="col-md-offset-1 col-md-10">
+                <section>
+                    <p class="blog-text">{{blogitem.blogtext}}</p>
+                </section>
             </div>
         </div>
         <div class="row">
-            <div class="col-md-12">
-                <p class="blog-text clear-text">{{blogitem.blogtext}}</p>
-                <br>
-                <br>
-                <br>
-                <br>
+            <div class="col-md-offset-2 col-md-10">
+                {% if blogitem.author: %}
+                <p class="blog-date">Posted by : {{blogitem.author}} on {{blogitem.created}}</p>
+                {% endif %}
             </div>
         </div>
-        {% endfor %}
+        <footer class="row">
+            <section class="col-md-offset-8 col-md-4 blogitemfooter">
+                {% if blogitem.author != author: %}
+                <form action="/bloglike/{{blogitem.key().id()}}" method="post">
+                    <button type="submit" class="btn btn-default" aria-label="Left Align">
+                            <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"> {{ blogitem.likes |length() }}</span>
+                        </button>
+                </form>
+                <form action="/blogdislike/{{blogitem.key().id()}}" method="post">
+                    <button type="submit" class="btn btn-default" aria-label="Left Align">
+                        <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"> {{ blogitem.dislikes|length() }}</span>
+                    </button>
+                </form>
+                {% endif %} {% if blogitem.author == author: %}
+                <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal">
+                            <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
+                 </button>
+                <form action="/blogdelete/{{blogitem.key().id()}}" method="post">
+                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                    <h4 class="modal-title" id="myModalLabel">Delete Blog</h4>
+                                </div>
+                                <div class="modal-body">
+                                    Do you really want to delete this blog article?
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                {% endif %}
+            </section>
+        </footer>
     </div>
+    {% endfor %}
+</div>
 {% endblock %}

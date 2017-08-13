@@ -28,7 +28,7 @@ def check_secure_val(secure_val):
         return val
 
 
-class Handler(webapp2.RequestHandler):
+class BlogHandler(webapp2.RequestHandler):
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
@@ -57,11 +57,11 @@ class Handler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
         self.user = uid and DB.User.by_id(int(uid))
-
+ 
     # def getescaped(self,textval):
     #     return textval.replace('\n','<br>')        
 
-class SignUpHandler(Handler):
+class SignUpHandler(BlogHandler):
     def get(self):
         self.render("usersignup.html")
 
@@ -111,7 +111,7 @@ class Register(SignUpHandler):
             u = DB.User.register(self.username, self.password, self.email)
             u.put()         
             self.login(u)
-            self.redirect('/welcome')
+            self.redirect('/blog')
 
 
 class Welcome(SignUpHandler):
@@ -124,7 +124,10 @@ class Welcome(SignUpHandler):
 
 class Login(SignUpHandler):
     def get(self):
-        self.render("login.html")
+        if self.user:
+            self.redirect("/blog")
+        else:            
+            self.render('login.html')
 
     def post(self):
       username = self.request.get('username')
@@ -133,17 +136,17 @@ class Login(SignUpHandler):
       u = DB.User.login(username, password)
       if u:
           self.login(u)
-          self.redirect('/welcome')
+          self.redirect('/blog')
       else:
-          msg = 'Invalid login'
+          msg = 'Invalid userid or password'
           self.render('login.html', error=msg)
 
 class Logout(SignUpHandler):
     def get(self):
      self.logout();
-     self.redirect('/blog')
+     self.redirect('/login')
 
-class NewPost(Handler):
+class NewPost(BlogHandler):
     def get(self):
         self.render("newpost.html")
     
@@ -152,20 +155,23 @@ class NewPost(Handler):
         blogtext = self.request.get("blogtext")
 
         if title and blogtext:
-            blogitem = DB.Blog(title=title,blogtext=blogtext)
+            blogitem = DB.Blog(title=title,blogtext=blogtext,author=self.user.name)
             b_key =blogitem.put()
             self.redirect("/blog/%d" % b_key.id())
         else:
-            blogerror = "Error!"
-            self.redirect("newpost.html",blogerror=blogerror)
+            blogerror = "Error! Provide Title and blog text.."
+            self.render("newpost.html",blogerror=blogerror)
 
-
-class BlogPost(Handler):
-       def get(self):
-            blogs = DB.Blog.get_all()
-            self.render("basicblog.html",blogs=blogs)
-            # DB.Blog.delete_all()
-            # self.render("basicblog.html")
+class BlogPost(BlogHandler):
+        def get(self):
+            if self.user:
+                # DB.Blog.delete_all()                    
+                blogs = DB.Blog.get_all()
+                params = dict(blogs = blogs,author = self.user.name)    
+                self.render("basicblog.html",**params)
+            else:
+                self.logout();
+                self.redirect('/login')
 
 
 class Permalink(BlogPost):
@@ -173,11 +179,47 @@ class Permalink(BlogPost):
         blogitem = DB.Blog.get_by_id(int(blog_id))
         self.render("blogitem.html", title=blogitem.title,blogtext=blogitem.blogtext)
 
-app = webapp2.WSGIApplication([ ('/blog', BlogPost),
+class BlogLike(BlogHandler):
+        def post(self, blog_id):
+            if self.user:
+                blogitem = DB.Blog.get_by_id(int(blog_id))
+                if blogitem and self.user.name not in blogitem.likes and self.user.name not in blogitem.dislikes:                   
+                    blogitem.likes.append(self.user.name)
+                    blogitem = blogitem.put()
+            self.redirect("/blog")
+            # blogs = DB.Blog.get_all()
+            # params = dict(blogs = blogs,author = self.user.name)    
+            # self.render("basicblog.html",**params)
+                
+
+class BlogDisLike(BlogHandler):
+        def post(self, blog_id):
+            if self.user:
+                blogitem = DB.Blog.get_by_id(int(blog_id))
+                if blogitem and self.user.name not in blogitem.likes and self.user.name not in blogitem.dislikes:
+                    blogitem.dislikes.append(self.user.name)
+                    blogitem = blogitem.put()
+            self.redirect("/blog")
+                
+class BlogDelete(BlogHandler):
+        def post(self, blog_id):
+            if self.user:
+                blogitem = DB.Blog.get_by_id(int(blog_id))
+                if blogitem and self.user.name == blogitem.author:                   
+                    blogitem.delete()
+            blogs = DB.Blog.get_all()
+            params = dict(blogs = blogs,author = self.user.name)    
+            self.render("basicblog.html",**params)
+
+app = webapp2.WSGIApplication([ ('/', Login),
+                                ('/blog', BlogPost),
                                 ('/signup', Register),
                                 ('/welcome', Welcome),
                                 ('/login', Login),
                                 ('/logout', Logout),
-                                ('/blog/newpost',NewPost),
+                                ('/newpost',NewPost),
                                 ('/blog/(\d+)', Permalink),
+                                ('/bloglike/(\d+)', BlogLike),
+                                ('/blogdislike/(\d+)', BlogDisLike),
+                                ('/blogdelete/(\d+)', BlogDelete)
                                ], debug=True)
