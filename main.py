@@ -243,8 +243,8 @@ class BlogEdit(BlogHandler):
             if title and blogtext:
                 if self.isprofane(title) or self.isprofane(blogtext):   
                     blogerror = "Error! Profane title or content is not allowed.."
-                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext,blogerror=blogerror)    
-                    self.render("newpost.html",**params) 
+                    params = dict(title=title,blogtext=blogtext,blogerror=blogerror)    
+                    self.render("editpost.html",**params)
                 else:                        
                     blogitem = DB.Blog.get_by_id(int(blog_id))
                     if blogitem:
@@ -273,22 +273,22 @@ class BlogComment(BlogHandler):
         
         def post(self, blog_id):
             comment = self.request.get("blogcomment")
-            if comment:          
-                if self.isprofane(comment):
-                    blogerror = "Error! Profane comments are not allowed.."
-                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext,blogerror=blogerror)    
-                    self.render("comment.html",**params) 
-                else:      
+            if comment:                
+                blogitem = DB.Blog.get_by_id(int(blog_id))
+                if blogitem and self.isprofane(comment):
+                    blogcommenterror = "Error! Profane comments are not allowed.."
+                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext,blogcommenterror=blogcommenterror)    
+                    self.render("comment.html",**params)   
+                else:
                     comment += " - " + self.user.name;
-                    blogitem = DB.Blog.get_by_id(int(blog_id))
                     if blogitem:
                         blogitem.comments.append(comment)
                         b_key = blogitem.put()
                     else:
                         self.write("error adding comments..")
             else:
-                blogerror = "Error! Provide comments.."
-                self.render("comment.html",blogcommenterror=blogerror)
+                blogcommenterror = "Error! Provide comments.."
+                self.render("comment.html",blogcommenterror=blogcommenterror)
 
 
 
