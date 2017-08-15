@@ -243,7 +243,8 @@ class BlogEdit(BlogHandler):
             if title and blogtext:
                 if self.isprofane(title) or self.isprofane(blogtext):   
                     blogerror = "Error! Profane title or content is not allowed.."
-                    self.render("newpost.html",blogerror=blogerror) 
+                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext,blogerror=blogerror)    
+                    self.render("newpost.html",**params) 
                 else:                        
                     blogitem = DB.Blog.get_by_id(int(blog_id))
                     if blogitem:
@@ -275,7 +276,8 @@ class BlogComment(BlogHandler):
             if comment:          
                 if self.isprofane(comment):
                     blogerror = "Error! Profane comments are not allowed.."
-                    self.render("comment.html",blogcommenterror=blogerror)
+                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext,blogerror=blogerror)    
+                    self.render("comment.html",**params) 
                 else:      
                     comment += " - " + self.user.name;
                     blogitem = DB.Blog.get_by_id(int(blog_id))
