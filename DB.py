@@ -59,13 +59,13 @@ class Blog(db.Model):
     created = db.DateProperty(auto_now_add = True)   
     likes = db.StringListProperty()
     dislikes = db.StringListProperty()
-    # comments = db.StringListProperty()
+    comments = db.StringListProperty()
     author = db.StringProperty()
 
 
     @classmethod
     def get_all(cls):
-        return Blog.gql("limit 30")
+        return Blog.gql("order by created desc limit 30")
 
     @classmethod
     def delete_all(cls):

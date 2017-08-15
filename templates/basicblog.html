@@ -38,10 +38,20 @@
                         <span class="glyphicon glyphicon-thumbs-down" aria-hidden="true"> {{ blogitem.dislikes|length() }}</span>
                     </button>
                 </form>
+                <form action="/blogcomment/{{blogitem.key().id()}}" method="get">
+                    <button type="submit" class="btn btn-default" aria-label="Left Align">
+                        <span class="glyphicon glyphicon-comment" aria-hidden="true"> Comment</span>
+                    </button>
+                </form>
                 {% endif %} {% if blogitem.author == author: %}
                 <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#myModal">
                             <span class="glyphicon glyphicon-trash" aria-hidden="true"></span>
                  </button>
+                <form action="/blogedit/{{blogitem.key().id()}}" method="get">
+                    <button type="submit" class="btn btn-default" aria-label="Left Align">
+                        <span class="glyphicon glyphicon-pencil" aria-hidden="true"> Edit</span>
+                    </button>
+                </form>
                 <form action="/blogdelete/{{blogitem.key().id()}}" method="post">
                     <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                         <div class="modal-dialog" role="document">
@@ -64,6 +74,26 @@
                 {% endif %}
             </section>
         </footer>
+        {% if blogitem.comments %}
+        <div class="row commentTitle">
+            <div class="col-md-offset-1 col-md-10">
+                <p>Comments</p>
+            </div>
+        </div>
+        <section class="commentsection">
+            <br> {% for comment in blogitem.comments %}
+            <div class="row comments">
+                <div class="col-md-offset-1 col-md-10">
+                    <p>{{comment}}</p>
+                    <br>
+                </div>
+            </div>
+            {% endfor %}
+            <br>
+
+        </section>
+        {% endif %}
+        <br>
     </div>
     {% endfor %}
 </div>

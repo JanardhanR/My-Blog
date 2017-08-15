@@ -11,6 +11,7 @@ import auth
 import DB
 import jinja2
 import webapp2
+import urllib
 
 secret = 'jana'
 
@@ -57,10 +58,19 @@ class BlogHandler(webapp2.RequestHandler):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
         self.user = uid and DB.User.by_id(int(uid))
- 
-    # def getescaped(self,textval):
-    #     return textval.replace('\n','<br>')        
+        
+    def isprofane(self, text_to_check):
+        connection = urllib.urlopen("http://www.wdylike.appspot.com/?q="+text_to_check)
+        output = connection.read()
+        connection.close()
+        if "true" in output:
+            return True
+        elif "false" in output:
+            return False
+        else:
+            return False
 
+ 
 class SignUpHandler(BlogHandler):
     def get(self):
         self.render("usersignup.html")
@@ -155,9 +165,13 @@ class NewPost(BlogHandler):
         blogtext = self.request.get("blogtext")
 
         if title and blogtext:
-            blogitem = DB.Blog(title=title,blogtext=blogtext,author=self.user.name)
-            b_key =blogitem.put()
-            self.redirect("/blog/%d" % b_key.id())
+            if self.isprofane(title) or self.isprofane(blogtext):   
+                 blogerror = "Error! Profane title or content is not allowed.."
+                 self.render("newpost.html",blogerror=blogerror) 
+            else:
+                blogitem = DB.Blog(title=title,blogtext=blogtext,author=self.user.name)
+                b_key =blogitem.put()
+                self.redirect("/blog/%d" % b_key.id())
         else:
             blogerror = "Error! Provide Title and blog text.."
             self.render("newpost.html",blogerror=blogerror)
@@ -211,6 +225,71 @@ class BlogDelete(BlogHandler):
             params = dict(blogs = blogs,author = self.user.name)    
             self.render("basicblog.html",**params)
 
+     
+class BlogEdit(BlogHandler):
+        def get(self, blog_id):
+            if self.user:
+                blogitem = DB.Blog.get_by_id(int(blog_id))
+                if blogitem:  
+                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext)    
+                    self.render("editpost.html", **params)
+                else:
+                    self.write("error")   
+        
+        def post(self, blog_id):
+            title = self.request.get("title")
+            blogtext = self.request.get("blogtext")
+
+            if title and blogtext:
+                if self.isprofane(title) or self.isprofane(blogtext):   
+                    blogerror = "Error! Profane title or content is not allowed.."
+                    self.render("newpost.html",blogerror=blogerror) 
+                else:                        
+                    blogitem = DB.Blog.get_by_id(int(blog_id))
+                    if blogitem:
+                        blogitem.title = title
+                        blogitem.blogtext = blogtext
+                        b_key = blogitem.put()                     
+                        self.redirect("/blog/%d" % b_key.id())
+            else:
+                blogitem = DB.Blog.get_by_id(int(blog_id))
+                if blogitem:  
+                    blogerror = "Error! Provide Title and blog text.."
+                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext,blogerror=blogerror)    
+                    self.render("editpost.html",**params)
+                else:
+                    self.write("unknown error during edit...")
+
+class BlogComment(BlogHandler):
+        def get(self, blog_id):
+            if self.user:
+                blogitem = DB.Blog.get_by_id(int(blog_id))
+                if blogitem:  
+                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext)    
+                    self.render("comment.html", **params)
+                else:
+                    self.write("error")   
+        
+        def post(self, blog_id):
+            comment = self.request.get("blogcomment")
+            if comment:          
+                if self.isprofane(comment):
+                    blogerror = "Error! Profane comments are not allowed.."
+                    self.render("comment.html",blogcommenterror=blogerror)
+                else:      
+                    comment += " - " + self.user.name;
+                    blogitem = DB.Blog.get_by_id(int(blog_id))
+                    if blogitem:
+                        blogitem.comments.append(comment)
+                        b_key = blogitem.put()
+                    else:
+                        self.write("error adding comments..")
+            else:
+                blogerror = "Error! Provide comments.."
+                self.render("comment.html",blogcommenterror=blogerror)
+
+
+
 app = webapp2.WSGIApplication([ ('/', Login),
                                 ('/blog', BlogPost),
                                 ('/signup', Register),
@@ -221,5 +300,7 @@ app = webapp2.WSGIApplication([ ('/', Login),
                                 ('/blog/(\d+)', Permalink),
                                 ('/bloglike/(\d+)', BlogLike),
                                 ('/blogdislike/(\d+)', BlogDisLike),
-                                ('/blogdelete/(\d+)', BlogDelete)
+                                ('/blogdelete/(\d+)', BlogDelete),
+                                ('/blogedit/(\d+)', BlogEdit),
+                                ('/blogcomment/(\d+)', BlogComment)
                                ], debug=True)

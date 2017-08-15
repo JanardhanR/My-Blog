@@ -1,4 +1,7 @@
 {% extends "basetemplate.html" %} {% block content %}
+<div>
+    <p>redirecting in 3 secs..</p>
+</div>
 <div class="blogitem">
     <h2>{{title}}</h2>
     <hr>
@@ -8,6 +11,5 @@
     window.setTimeout(function () {
         window.location.href = "/blog";
     }, 3000);
-
 </script>
 {% endblock %}
