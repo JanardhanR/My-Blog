@@ -55,7 +55,7 @@ class BlogHandler(webapp2.RequestHandler):
         self.User = uid and DB.User.by_id(int(uid))
 
     def isprofane(self, text_to_check):
-        """Profanity checker 
+        """Profanity checker
          Make sure users don't enter bad words.."""
 
         connection = urllib.urlopen("http://www.purgomalum.com/service/containsprofanity?text=" \
@@ -127,7 +127,7 @@ class Register(SignUpHandler):
             self.redirect('/blog')
 
 class Login(BlogHandler):
-    """Login class provides base functions for the  blog handling."""
+    """Login class provides login function handling."""
 
     def get(self):
         if self.User:
@@ -147,12 +147,16 @@ class Login(BlogHandler):
             msg = 'Invalid userid or password'
             self.render('login.html', error=msg)
 
-class Logout(SignUpHandler):
+class Logout(BlogHandler):
+    """Logout class provides logout function handling."""
+
     def get(self):
         self.logout()
         self.redirect('/login')
 
 class NewPost(BlogHandler):
+    """Provides functions for adding new post to blog."""
+
     def get(self):
         self.render("newpost.html")
 
@@ -173,6 +177,9 @@ class NewPost(BlogHandler):
             self.render("newpost.html", blogerror=blogerror)
 
 class BlogPost(BlogHandler):
+    """Just shows all the blog pages, or redirects to login if user is not loggedin and
+    attempts to change anything."""
+
     def get(self):
         if self.User:
             # DB.Blog.delete_all()
@@ -185,11 +192,15 @@ class BlogPost(BlogHandler):
 
 
 class Permalink(BlogHandler):
+    """Shows a preview of new post before being showing them in list of blogs."""
+
     def get(self, blog_id):
         blogitem = DB.Blog.get_by_id(int(blog_id))
         self.render("blogitem.html", title=blogitem.title, blogtext=blogitem.blogtext)
 
 class BlogLike(BlogHandler):
+    """Like handler."""
+
     def post(self, blog_id):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
@@ -200,6 +211,8 @@ class BlogLike(BlogHandler):
             self.redirect("/blog")
 
 class BlogDisLike(BlogHandler):
+    """Dislike handler."""
+
     def post(self, blog_id):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
@@ -210,6 +223,8 @@ class BlogDisLike(BlogHandler):
         self.redirect("/blog")
 
 class BlogDelete(BlogHandler):
+    """Delete blog handler for logged in user."""
+
     def post(self, blog_id):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
@@ -218,6 +233,8 @@ class BlogDelete(BlogHandler):
         self.redirect("/blog")
 
 class BlogEdit(BlogHandler):
+    """Edit blog handler for logged in author."""
+
     def get(self, blog_id):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
@@ -253,6 +270,8 @@ class BlogEdit(BlogHandler):
                 self.write("unknown error during edit...")
 
 class BlogComment(BlogHandler):
+    """Comment on blog handler, only for user other than author."""
+
     def get(self, blog_id):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
