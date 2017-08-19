@@ -1,27 +1,20 @@
-import codecs
-import hashlib
-import hmac
 import os
-import random
-import re
-import string
-import time
-
-import auth
-import DB
+import urllib
+import hmac
 import jinja2
 import webapp2
-import urllib
+import auth
+import DB
 
-secret = 'jana'
+STRONG_NAME_KEY = 'jana'
 
-template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(
-    loader=jinja2.FileSystemLoader(template_dir),autoescape=True)
+TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
+JINJA_ENV = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(TEMPLATE_DIR), autoescape=True)
 
 
 def make_secure_val(val):
-    return '%s|%s' % (val, hmac.new(secret, val).hexdigest())
+    return '%s|%s' % (val, hmac.new(STRONG_NAME_KEY, val).hexdigest())
 
 def check_secure_val(secure_val):
     val = secure_val.split('|')[0]
@@ -30,19 +23,21 @@ def check_secure_val(secure_val):
 
 
 class BlogHandler(webapp2.RequestHandler):
+    """BlogHandler class provides base functions for the  blog handling."""
+
     def write(self, *a, **kw):
         self.response.out.write(*a, **kw)
 
     def render_str(self, template, **params):
-        t = jinja_env.get_template(template)
-        return t.render(params)
+        template_to_use = JINJA_ENV.get_template(template)
+        return template_to_use.render(params)
 
-    def render(self, template, **kw): 
+    def render(self, template, **kw):
         self.write(self.render_str(template, **kw))
-    
+
     def set_secure_cookie(self, name, val):
         cookie_val = make_secure_val(val)
-        self.response.headers.add_header('Set-Cookie','%s=%s; Path=/' % (name, cookie_val))
+        self.response.headers.add_header('Set-Cookie', '%s=%s; Path=/' % (name, cookie_val))
 
     def read_secure_cookie(self, name):
         cookie_val = self.request.cookies.get(name)
@@ -57,20 +52,19 @@ class BlogHandler(webapp2.RequestHandler):
     def initialize(self, *a, **kw):
         webapp2.RequestHandler.initialize(self, *a, **kw)
         uid = self.read_secure_cookie('user_id')
-        self.user = uid and DB.User.by_id(int(uid))
-        
+        self.User = uid and DB.User.by_id(int(uid))
+
     def isprofane(self, text_to_check):
-        connection = urllib.urlopen("http://www.wdylike.appspot.com/?q="+text_to_check)
+        connection = urllib.urlopen("http://www.purgomalum.com/service/containsprofanity?text=" \
+        +text_to_check)
         output = connection.read()
         connection.close()
         if "true" in output:
             return True
         elif "false" in output:
             return False
-        else:
-            return False
+        return False
 
- 
 class SignUpHandler(BlogHandler):
     def get(self):
         self.render("usersignup.html")
@@ -82,9 +76,9 @@ class SignUpHandler(BlogHandler):
         self.verify = self.request.get('verify')
         self.email = self.request.get('email')
 
-        params = dict(username = self.username,
-                      email = self.email)
-        authcred = auth.AuthCred();
+        params = dict(username=self.username,
+                      email=self.email)
+        authcred = auth.AuthCred()
 
         if not authcred.valid_username(self.username):
             params['usererror'] = "That's not a valid username."
@@ -111,198 +105,194 @@ class SignUpHandler(BlogHandler):
 
 
 class Register(SignUpHandler):
-    def done(self):
+    def done(self, *a, **kw):
         # make sure the user doesn't already exist
-        u = DB.User.by_name(self.username)
-        if u:
+        currentuser = DB.User.by_name(self.username)
+        if currentuser:
             msg = 'That user already exists.'
-            self.render('usersignup.html', usererror = msg)
+            self.render('usersignup.html', usererror=msg)
         else:
-            u = DB.User.register(self.username, self.password, self.email)
-            u.put()         
-            self.login(u)
+            currentuser = DB.User.register(self.username, self.password, self.email)
+            currentuser.put()
+            self.login(currentuser)
             self.redirect('/blog')
 
 
 class Welcome(SignUpHandler):
-       def get(self):
-        if self.user:
-            self.render('gooduser.html', username = self.user.name)
+    def get(self):
+        if self.User:
+            self.render('gooduser.html', username=self.User.name)
         else:
             self.redirect('/signup')
 
 
 class Login(SignUpHandler):
     def get(self):
-        if self.user:
+        if self.User:
             self.redirect("/blog")
-        else:            
+        else:
             self.render('login.html')
 
     def post(self):
-      username = self.request.get('username')
-      password = self.request.get('password')
+        username = self.request.get('username')
+        password = self.request.get('password')
 
-      u = DB.User.login(username, password)
-      if u:
-          self.login(u)
-          self.redirect('/blog')
-      else:
-          msg = 'Invalid userid or password'
-          self.render('login.html', error=msg)
+        logging_in_user = DB.User.login(username, password)
+        if logging_in_user:
+            self.login(logging_in_user)
+            self.redirect('/blog')
+        else:
+            msg = 'Invalid userid or password'
+            self.render('login.html', error=msg)
 
 class Logout(SignUpHandler):
     def get(self):
-     self.logout();
-     self.redirect('/login')
+        self.logout()
+        self.redirect('/login')
 
 class NewPost(BlogHandler):
     def get(self):
         self.render("newpost.html")
-    
+
     def post(self):
         title = self.request.get("title")
         blogtext = self.request.get("blogtext")
 
         if title and blogtext:
-            if self.isprofane(title) or self.isprofane(blogtext):   
-                 blogerror = "Error! Profane title or content is not allowed.."
-                 self.render("newpost.html",blogerror=blogerror) 
+            if self.isprofane(title) or self.isprofane(blogtext):
+                blogerror = "Error! Profane title or content is not allowed.."
+                self.render("newpost.html", blogerror=blogerror)
             else:
-                blogitem = DB.Blog(title=title,blogtext=blogtext,author=self.user.name)
-                b_key =blogitem.put()
+                blogitem = DB.Blog(title=title, blogtext=blogtext, author=self.User.name)
+                b_key = blogitem.put()
                 self.redirect("/blog/%d" % b_key.id())
         else:
             blogerror = "Error! Provide Title and blog text.."
-            self.render("newpost.html",blogerror=blogerror)
+            self.render("newpost.html", blogerror=blogerror)
 
 class BlogPost(BlogHandler):
-        def get(self):
-            if self.user:
-                # DB.Blog.delete_all()                    
-                blogs = DB.Blog.get_all()
-                params = dict(blogs = blogs,author = self.user.name)    
-                self.render("basicblog.html",**params)
-            else:
-                self.logout();
-                self.redirect('/login')
+    def get(self):
+        if self.User:
+            # DB.Blog.delete_all()
+            blogs = DB.Blog.get_all()
+            params = dict(blogs=blogs, author=self.User.name)
+            self.render("basicblog.html", **params)
+        else:
+            self.logout()
+            self.redirect('/login')
 
 
-class Permalink(BlogPost):
+class Permalink(BlogHandler):
     def get(self, blog_id):
         blogitem = DB.Blog.get_by_id(int(blog_id))
-        self.render("blogitem.html", title=blogitem.title,blogtext=blogitem.blogtext)
+        self.render("blogitem.html", title=blogitem.title, blogtext=blogitem.blogtext)
 
 class BlogLike(BlogHandler):
-        def post(self, blog_id):
-            if self.user:
-                blogitem = DB.Blog.get_by_id(int(blog_id))
-                if blogitem and self.user.name not in blogitem.likes and self.user.name not in blogitem.dislikes:                   
-                    blogitem.likes.append(self.user.name)
-                    blogitem = blogitem.put()
+    def post(self, blog_id):
+        if self.User:
+            blogitem = DB.Blog.get_by_id(int(blog_id))
+            if blogitem and self.User.name not in blogitem.likes and \
+            self.User.name not in blogitem.dislikes:
+                blogitem.likes.append(self.User.name)
+                blogitem = blogitem.put()
             self.redirect("/blog")
-            # blogs = DB.Blog.get_all()
-            # params = dict(blogs = blogs,author = self.user.name)    
-            # self.render("basicblog.html",**params)
-                
 
 class BlogDisLike(BlogHandler):
-        def post(self, blog_id):
-            if self.user:
-                blogitem = DB.Blog.get_by_id(int(blog_id))
-                if blogitem and self.user.name not in blogitem.likes and self.user.name not in blogitem.dislikes:
-                    blogitem.dislikes.append(self.user.name)
-                    blogitem = blogitem.put()
-            self.redirect("/blog")
-                
+    def post(self, blog_id):
+        if self.User:
+            blogitem = DB.Blog.get_by_id(int(blog_id))
+            if blogitem and self.User.name not in blogitem.likes and \
+            self.User.name not in blogitem.dislikes:
+                blogitem.dislikes.append(self.User.name)
+                blogitem = blogitem.put()
+        self.redirect("/blog")
+
 class BlogDelete(BlogHandler):
-        def post(self, blog_id):
-            if self.user:
-                blogitem = DB.Blog.get_by_id(int(blog_id))
-                if blogitem and self.user.name == blogitem.author:                   
-                    blogitem.delete()
-            blogs = DB.Blog.get_all()
-            params = dict(blogs = blogs,author = self.user.name)    
-            self.render("basicblog.html",**params)
+    def post(self, blog_id):
+        if self.User:
+            blogitem = DB.Blog.get_by_id(int(blog_id))
+            if blogitem and self.User.name == blogitem.author:
+                blogitem.delete()
+        self.redirect("/blog")
 
-     
 class BlogEdit(BlogHandler):
-        def get(self, blog_id):
-            if self.user:
-                blogitem = DB.Blog.get_by_id(int(blog_id))
-                if blogitem:  
-                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext)    
-                    self.render("editpost.html", **params)
-                else:
-                    self.write("error")   
-        
-        def post(self, blog_id):
-            title = self.request.get("title")
-            blogtext = self.request.get("blogtext")
+    def get(self, blog_id):
+        if self.User:
+            blogitem = DB.Blog.get_by_id(int(blog_id))
+            if blogitem:
+                params = dict(title=blogitem.title, blogtext=blogitem.blogtext)
+                self.render("editpost.html", **params)
+            else:
+                self.write("error")
 
-            if title and blogtext:
-                if self.isprofane(title) or self.isprofane(blogtext):   
-                    blogerror = "Error! Profane title or content is not allowed.."
-                    params = dict(title=title,blogtext=blogtext,blogerror=blogerror)    
-                    self.render("editpost.html",**params)
-                else:                        
-                    blogitem = DB.Blog.get_by_id(int(blog_id))
-                    if blogitem:
-                        blogitem.title = title
-                        blogitem.blogtext = blogtext
-                        b_key = blogitem.put()                     
-                        self.redirect("/blog/%d" % b_key.id())
+    def post(self, blog_id):
+        title = self.request.get("title")
+        blogtext = self.request.get("blogtext")
+
+        if title and blogtext:
+            if self.isprofane(title) or self.isprofane(blogtext):
+                blogerror = "Error! Profane title or content is not allowed.."
+                params = dict(title=title, blogtext=blogtext, blogerror=blogerror)
+                self.render("editpost.html", **params)
             else:
                 blogitem = DB.Blog.get_by_id(int(blog_id))
-                if blogitem:  
-                    blogerror = "Error! Provide Title and blog text.."
-                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext,blogerror=blogerror)    
-                    self.render("editpost.html",**params)
-                else:
-                    self.write("unknown error during edit...")
+                if blogitem:
+                    blogitem.title = title
+                    blogitem.blogtext = blogtext
+                    b_key = blogitem.put()
+                    self.redirect("/blog/%d" % b_key.id())
+        else:
+            blogitem = DB.Blog.get_by_id(int(blog_id))
+            if blogitem:
+                blogerror = "Error! Provide Title and blog text.."
+                params = dict(title=blogitem.title, blogtext=blogitem.blogtext, blogerror=blogerror)
+                self.render("editpost.html", **params)
+            else:
+                self.write("unknown error during edit...")
 
 class BlogComment(BlogHandler):
-        def get(self, blog_id):
-            if self.user:
-                blogitem = DB.Blog.get_by_id(int(blog_id))
-                if blogitem:  
-                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext)    
-                    self.render("comment.html", **params)
-                else:
-                    self.write("error")   
-        
-        def post(self, blog_id):
-            comment = self.request.get("blogcomment")
-            if comment:                
-                blogitem = DB.Blog.get_by_id(int(blog_id))
-                if blogitem and self.isprofane(comment):
-                    blogcommenterror = "Error! Profane comments are not allowed.."
-                    params = dict(title=blogitem.title,blogtext=blogitem.blogtext,blogcommenterror=blogcommenterror)    
-                    self.render("comment.html",**params)   
-                else:
-                    comment += " - " + self.user.name;
-                    if blogitem:
-                        blogitem.comments.append(comment)
-                        b_key = blogitem.put()
-                    else:
-                        self.write("error adding comments..")
+    def get(self, blog_id):
+        if self.User:
+            blogitem = DB.Blog.get_by_id(int(blog_id))
+            if blogitem:
+                params = dict(title=blogitem.title, blogtext=blogitem.blogtext)
+                self.render("comment.html", **params)
             else:
-                blogcommenterror = "Error! Provide comments.."
-                self.render("comment.html",blogcommenterror=blogcommenterror)
+                self.write("error")
+
+    def post(self, blog_id):
+        comment = self.request.get("blogcomment")
+        if comment:
+            blogitem = DB.Blog.get_by_id(int(blog_id))
+            if blogitem and self.isprofane(comment):
+                blogcommenterror = "Error! Profane comments are not allowed.."
+                params = dict(title=blogitem.title, blogtext=blogitem.blogtext, \
+                blogcommenterror=blogcommenterror)
+                self.render("comment.html", **params)
+            else:
+                comment += " - " + self.User.name
+                if blogitem:
+                    blogitem.comments.append(comment)
+                    blogitem.put()
+                    self.redirect("/blog")
+                else:
+                    self.write("error adding comments..")
+        else:
+            blogcommenterror = "Error! Provide comments.."
+            self.render("comment.html", blogcommenterror=blogcommenterror)
 
 
 
-app = webapp2.WSGIApplication([ ('/', Login),
-                                ('/blog', BlogPost),
-                                ('/signup', Register),
-                                ('/welcome', Welcome),
-                                ('/login', Login),
-                                ('/logout', Logout),
-                                ('/newpost',NewPost),
-                                ('/blog/(\d+)', Permalink),
-                                ('/bloglike/(\d+)', BlogLike),
-                                ('/blogdislike/(\d+)', BlogDisLike),
-                                ('/blogdelete/(\d+)', BlogDelete),
-                                ('/blogedit/(\d+)', BlogEdit),
-                                ('/blogcomment/(\d+)', BlogComment)
-                               ], debug=True)
+app = webapp2.WSGIApplication([('/', Login),
+                               ('/blog', BlogPost),
+                               ('/signup', Register),
+                               ('/welcome', Welcome),
+                               ('/login', Login),
+                               ('/logout', Logout),
+                               ('/newpost', NewPost),
+                               (r'/blog/(\d+)', Permalink),
+                               (r'/bloglike/(\d+)', BlogLike),
+                               (r'/blogdislike/(\d+)', BlogDisLike),
+                               (r'/blogdelete/(\d+)', BlogDelete),
+                               (r'/blogedit/(\d+)', BlogEdit),
+                               (r'/blogcomment/(\d+)', BlogComment)], debug=True)

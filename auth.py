@@ -1,10 +1,7 @@
-import codecs
-import os
 import re
-import string
 
 
-class AuthCred():
+class AuthCred(object):
     USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
     PASSWORD = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
     EMAIL = re.compile(r"^[\S]+@[\S]+.[\S]+$")

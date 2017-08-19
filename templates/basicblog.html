@@ -1,9 +1,10 @@
 {% extends "basetemplate.html" %} {% block headercontent %}
 <li><a href="/newpost">New Post</a></li>
 <li><a href="/logout">Logout [{{author}}]</a></li>
-{% endblock %} {% block content %}
-
-<div class="blog">
+{% endblock %} 
+{% block blog %} <div class="text-center blogheadtitle"><h1></h1></div>  {% endblock %}
+{% block content %}
+<div class="blog">    
     {%for blogitem in blogs%}
     <div class="container blogitem ">
         <header class="row blogitemhead">
@@ -13,9 +14,7 @@
         </header>
         <div class="row blogitembody">
             <div class="col-md-offset-1 col-md-10">
-                <section>
-                    <p class="blog-text">{{blogitem.blogtext}}</p>
-                </section>
+                <p class="blog-text">{{blogitem.blogtext}}</p>
             </div>
         </div>
         <div class="row">

@@ -80,7 +80,7 @@ text-align: center;
 }
 
 .blog {
-  margin-top: 100px;
+  margin-top: 25px;
   margin-left: 30px; 
   margin-right: 30px; 
   background: grey;
@@ -126,6 +126,10 @@ text-align: center;
 
 .commentsection {
   border: 1px solid darkblue;
+}
+
+.blogheadtitle {
+  margin-top: 15px;
 }
 /*  
 * {
