@@ -10,7 +10,7 @@ Project files
 How to open/run the Blog
 1. Blog is deployed on GCloud and can be accessed using the below URL
      http://blogpost-173512.appspot.com
-2. Login using the below userid/passwords to login and try out newpost/comment/edit/like/dislike.
+2. Signup for a new user or Login using the below userid/passwords to login and try out newpost/comment/edit/like/dislike.
    a.  username -> jana , password -> jana
    b.  username -> banu , password -> banu
    b.  username -> oppo , password -> oppo

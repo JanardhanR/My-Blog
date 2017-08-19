@@ -182,7 +182,7 @@ class BlogPost(BlogHandler):
 
     def get(self):
         if self.User:
-            # DB.Blog.delete_all()
+            # DB.Blog.delete_all() #use it when required to delete all blogs..
             blogs = DB.Blog.get_all()
             params = dict(blogs=blogs, author=self.User.name)
             self.render("basicblog.html", **params)
