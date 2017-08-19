@@ -55,6 +55,9 @@ class BlogHandler(webapp2.RequestHandler):
         self.User = uid and DB.User.by_id(int(uid))
 
     def isprofane(self, text_to_check):
+        """Profanity checker 
+         Make sure users don't enter bad words.."""
+
         connection = urllib.urlopen("http://www.purgomalum.com/service/containsprofanity?text=" \
         +text_to_check)
         output = connection.read()
@@ -66,6 +69,8 @@ class BlogHandler(webapp2.RequestHandler):
         return False
 
 class SignUpHandler(BlogHandler):
+    """Signup handler class provides base functions for the signup handling."""
+
     def get(self):
         self.render("usersignup.html")
 
@@ -105,7 +110,11 @@ class SignUpHandler(BlogHandler):
 
 
 class Register(SignUpHandler):
+    """Extended the signup handler for registration and storing in db."""
+
     def done(self, *a, **kw):
+        """BlogHandler class provides base functions for the  blog handling."""
+
         # make sure the user doesn't already exist
         currentuser = DB.User.by_name(self.username)
         if currentuser:
@@ -117,16 +126,9 @@ class Register(SignUpHandler):
             self.login(currentuser)
             self.redirect('/blog')
 
+class Login(BlogHandler):
+    """Login class provides base functions for the  blog handling."""
 
-class Welcome(SignUpHandler):
-    def get(self):
-        if self.User:
-            self.render('gooduser.html', username=self.User.name)
-        else:
-            self.redirect('/signup')
-
-
-class Login(SignUpHandler):
     def get(self):
         if self.User:
             self.redirect("/blog")
@@ -286,7 +288,6 @@ class BlogComment(BlogHandler):
 app = webapp2.WSGIApplication([('/', Login),
                                ('/blog', BlogPost),
                                ('/signup', Register),
-                               ('/welcome', Welcome),
                                ('/login', Login),
                                ('/logout', Logout),
                                ('/newpost', NewPost),

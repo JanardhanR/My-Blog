@@ -13,17 +13,6 @@ body {
   background-attachment: fixed;
 }
 
-@media screen and (max-width:400px) {
-  body {
-      background-image: url(images/background-800x1600_small_1x.jpg);
-      background-size: cover;
-      color:white;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-attachment: fixed;
-    }
-}
-
 .brand {
   font-size:26px; 
   background-color:blue;  
@@ -53,10 +42,8 @@ text-align: center;
 }
 
 .navbar {
-  background:  black; 
-  
+  background:  black;   
   border:none;
-  margin-bottom: 0px;
 }
 
 .blog-text {
@@ -131,13 +118,3 @@ text-align: center;
 .blogheadtitle {
   margin-top: 15px;
 }
-/*  
-* {
-   outline: 1px solid red !important;
-}
-* {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    -ms-box-sizing: border-box;
-    box-sizing: border-box;
-}  */

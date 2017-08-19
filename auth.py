@@ -1,6 +1,5 @@
 import re
 
-
 class AuthCred(object):
     USER_RE = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
     PASSWORD = re.compile(r"^[a-zA-Z0-9_-]{3,20}$")
