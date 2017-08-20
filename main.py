@@ -110,6 +110,7 @@ class SignUpHandler(BlogHandler):
         if have_error:
             self.render('usersignup.html', **params)
         else:
+            # Will be handled by derived class.
             self.done()
 
     def done(self, *a, **kw):
@@ -120,7 +121,7 @@ class Register(SignUpHandler):
     """Extended the signup handler for registration and storing in db."""
 
     def done(self, *a, **kw):
-        """BlogHandler class provides base functions for the  blog handling."""
+        """Overrides the default behavior of Signup handler class."""
 
         # make sure the user doesn't already exist
         currentuser = DB.User.by_name(self.username)
@@ -184,7 +185,7 @@ class NewPost(BlogHandler):
             self.render("newpost.html", blogerror=blogerror)
 
 class BlogPost(BlogHandler):
-    """Just shows all the blog pages, or redirects to login if user is not loggedin and
+    """Just shows all the blog pages, or redirects to login if user is not logged in and
     attempts to change anything."""
 
     def get(self):
@@ -215,7 +216,8 @@ class BlogLike(BlogHandler):
             self.User.name not in blogitem.dislikes:
                 blogitem.likes.append(self.User.name)
                 blogitem = blogitem.put()
-            self.redirect("/blog")
+        #Redirect to /blog by default to cause a refresh.
+        self.redirect("/blog")
 
 class BlogDisLike(BlogHandler):
     """Dislike handler."""
@@ -227,6 +229,7 @@ class BlogDisLike(BlogHandler):
             self.User.name not in blogitem.dislikes:
                 blogitem.dislikes.append(self.User.name)
                 blogitem = blogitem.put()
+        #Redirect to /blog by default to cause a refresh.
         self.redirect("/blog")
 
 class BlogDelete(BlogHandler):
@@ -237,6 +240,7 @@ class BlogDelete(BlogHandler):
             blogitem = DB.Blog.get_by_id(int(blog_id))
             if blogitem and self.User.name == blogitem.author:
                 blogitem.delete()
+        #Redirect to /blog by default to cause a refresh.
         self.redirect("/blog")
 
 class BlogEdit(BlogHandler):
@@ -249,7 +253,8 @@ class BlogEdit(BlogHandler):
                 params = dict(title=blogitem.title, blogtext=blogitem.blogtext)
                 self.render("editpost.html", **params)
             else:
-                self.write("error")
+                # write error so that we catch any new scenario
+                self.write("error getting blog edit")
 
     def post(self, blog_id):
         title = self.request.get("title")
@@ -257,6 +262,7 @@ class BlogEdit(BlogHandler):
 
         if title and blogtext:
             if self.isprofane(title) or self.isprofane(blogtext):
+                #Make sure no profanity is accepted even during blog edit..
                 blogerror = "Error! Profane title or content is not allowed.."
                 params = dict(title=title, blogtext=blogtext, blogerror=blogerror)
                 self.render("editpost.html", **params)
@@ -274,6 +280,7 @@ class BlogEdit(BlogHandler):
                 params = dict(title=blogitem.title, blogtext=blogitem.blogtext, blogerror=blogerror)
                 self.render("editpost.html", **params)
             else:
+                # write error so that we catch any new scenario
                 self.write("unknown error during edit...")
 
 class BlogComment(BlogHandler):

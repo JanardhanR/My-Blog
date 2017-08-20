@@ -1,6 +1,27 @@
 """This module provides authorization classes."""
 
 import re
+import hashlib
+import random
+import string
+
+def make_salt():
+    """Returns a random set of characters."""
+    return "".join(random.choice(string.letters) for x in xrange(10))
+
+def make_pw_hash(name, password, salt=None):
+    """Provides hash for password."""
+    if not salt:
+        salt = make_salt()
+    hasval = hashlib.sha256(name + password+ salt).hexdigest()
+    return '%s,%s' % (hasval, salt)
+
+def valid_pw(name, password, hashstr):
+    """Validates if given password matches the password in given hash."""
+
+    salt = hashstr.split(",")[1]
+    return hashstr == make_pw_hash(name, password, salt)
+
 
 class AuthCred(object):
     """Provides validation functions for username, password and email."""
