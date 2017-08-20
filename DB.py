@@ -1,3 +1,5 @@
+"""This module provides authorization classes."""
+
 import hashlib
 import random
 import string

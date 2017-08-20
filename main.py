@@ -1,3 +1,5 @@
+"""This module provides Multiuser Blog handler classes."""
+
 import os
 import urllib
 import hmac
@@ -8,15 +10,20 @@ import DB
 
 STRONG_NAME_KEY = 'jana'
 
+#setup template and jinja2 environment
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
 JINJA_ENV = jinja2.Environment(
     loader=jinja2.FileSystemLoader(TEMPLATE_DIR), autoescape=True)
 
 
 def make_secure_val(val):
+    """returns a hmac value for given value."""
+
     return '%s|%s' % (val, hmac.new(STRONG_NAME_KEY, val).hexdigest())
 
 def check_secure_val(secure_val):
+    """Checks if passed secure value matches the hmac and the same strong name key."""
+
     val = secure_val.split('|')[0]
     if secure_val == make_secure_val(val):
         return val
