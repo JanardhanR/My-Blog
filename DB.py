@@ -90,12 +90,6 @@ class BlogComments(db.Model):
 
     @classmethod
     def by_commentid(cls, commentid):
-        """Get user by id."""
-        comment = cls.gql("WHERE commentid = :commentid", commentid=commentid)
-        return comment
-
-    @classmethod
-    def by_name(cls, commentid):
         """Get user by name."""
 
         user = cls.all().filter('commentid =', commentid).get()

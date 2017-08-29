@@ -218,7 +218,9 @@ class BlogPost(BlogHandler):
         if self.User:
             blogs = DB.Blog.get_all()
             blogcomments = DB.BlogComments.get_all()
-            params = dict(blogs=blogs, blogcomments=blogcomments, author=self.User.name)
+            params = dict(blogs=blogs,
+                          blogcomments=blogcomments,
+                          author=self.User.name)
             self.render("basicblog.html", **params)
         else:
             self.logout()
@@ -382,7 +384,8 @@ class BlogComment(BlogHandler):
                                       blogcommenterror=blogcommenterror)
                         self.render("comment.html", **params)
                     else:
-                        commentitem = DB.BlogComments(commentid=DB.BlogComments.
+                        commentitem = DB.BlogComments(commentid=DB.
+                                                      BlogComments.
                                                       get_all().count(),
                                                       comments=comment,
                                                       author=self.User.name)
@@ -405,9 +408,10 @@ class BlogCommentEdit(BlogHandler):
 
     def get(self, comment_id):
         if self.User:
-            comment_to_edit = DB.BlogComments.by_name(long(comment_id))
+            comment_to_edit = DB.BlogComments.by_commentid(long(comment_id))
             if comment_to_edit:
-                self.render("commentedit.html", blogcomment=comment_to_edit.comments)
+                self.render("commentedit.html",
+                            blogcomment=comment_to_edit.comments)
             else:
                 self.write("error getting blog comments")
         else:
@@ -424,7 +428,7 @@ class BlogCommentEdit(BlogHandler):
                                 blogcomment=blogcomment,
                                 blogcommenterror=blogcommenterror)
                 else:
-                    commentitem = DB.BlogComments.by_name(long(comment_id))
+                    commentitem = DB.BlogComments.by_commentid(long(comment_id))
                     if commentitem:
                         commentitem.comments = blogcomment
                         c_key = commentitem.put()
@@ -433,7 +437,8 @@ class BlogCommentEdit(BlogHandler):
                         else:
                             self.write("Error adding comments..")
                     else:
-                        self.write("error getting commentitem in comment edit post..")
+                        self.write("""error getting commentitem
+                                   in comment edit post..""")
             else:
                 blogcommenterror = "Error! Provide comments.."
                 self.render("comment.html", blogcommenterror=blogcommenterror)
@@ -445,26 +450,23 @@ class BlogCommentEdit(BlogHandler):
 class BlogCommentDelete(BlogHandler):
     """Delete comment handler for logged in author."""
 
-    def post(self, comment_id):
+    def post(self, blog_id, comment_id):
         if self.User:
-            blogcomment = self.request.get("blogcomment")
-            if blogcomment:
-                commentitem = DB.BlogComments.by_name(long(comment_id))
-                if commentitem:
-                    commentitem.comments = blogcomment
-                    c_key = commentitem.put()
-                    if c_key:
-                        self.redirect("/blog")
-                    else:
-                        self.write("Error adding comments..")
+            blogitem = DB.Blog.get_by_id(int(blog_id))
+            if blogitem:
+                commentitem = DB.BlogComments.by_commentid(long(comment_id))
+                if commentitem and self.User.name == commentitem.author:
+                    blogitem.comments.remove(commentitem.commentid)
+                    blogitem.put()
+                    commentitem.delete()
                 else:
-                    self.write("error getting commentitem in comment edit post..")
+                    self.write("error")
             else:
-                blogcommenterror = "Error! Provide comments.."
-                self.render("comment.html", blogcommenterror=blogcommenterror)
-                self.write("check 2")
-        else:
-            self.redirect('/login')
+                self.write("error getting blog item.")
+
+        '# Redirect to /blog by default to cause a refresh.'
+        self.redirect("/blog")
+
 
 app = webapp2.WSGIApplication([('/', Login),
                                ('/blog', BlogPost),
@@ -478,6 +480,6 @@ app = webapp2.WSGIApplication([('/', Login),
                                (r'/blogdelete/(\d+)', BlogDelete),
                                (r'/blogedit/(\d+)', BlogEdit),
                                (r'/blogcomedit/(\d+)', BlogCommentEdit),
-                               (r'/blogcomdel/(\d+)', BlogCommentDelete),
+                               (r'/blogcomdel/(\d+)/(\d+)', BlogCommentDelete),
                                (r'/blogcomment/(\d+)', BlogComment)],
                               debug=True)
