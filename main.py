@@ -190,7 +190,9 @@ class NewPost(BlogHandler):
                 if self.isprofane(title) or self.isprofane(blogtext):
                     blogerror = '''Error! Profane
                     title or content is not allowed..'''
-                    self.render("newpost.html", blogerror=blogerror)
+                    self.render("newpost.html", title=title,
+                                blogtext=blogtext,
+                                blogerror=blogerror)
                 else:
                     blogitem = DB.Blog(title=title,
                                        blogtext=blogtext,
@@ -199,7 +201,9 @@ class NewPost(BlogHandler):
                     self.redirect("/blog/%d" % b_key.id())
             else:
                 blogerror = "Error! Provide Title and blog text.."
-                self.render("newpost.html", blogerror=blogerror)
+                self.render("newpost.html", title=title,
+                            blogtext=blogtext,
+                            blogerror=blogerror)
         else:
             self.logout()
             self.redirect('/login')
@@ -212,9 +216,9 @@ class BlogPost(BlogHandler):
 
     def get(self):
         if self.User:
-            # DB.Blog.delete_all() #use it when required to delete all blogs..
             blogs = DB.Blog.get_all()
-            params = dict(blogs=blogs, author=self.User.name)
+            blogcomments = DB.BlogComments.get_all()
+            params = dict(blogs=blogs, blogcomments=blogcomments, author=self.User.name)
             self.render("basicblog.html", **params)
         else:
             self.logout()
@@ -291,6 +295,7 @@ class BlogDelete(BlogHandler):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
             if blogitem and self.User.name == blogitem.author:
+                DB.BlogComments.delete_by_ids(blogitem.comments)
                 blogitem.delete()
         '# Redirect to /blog by default to cause a refresh.'
         self.redirect("/blog")
@@ -368,27 +373,98 @@ class BlogComment(BlogHandler):
             comment = self.request.get("blogcomment")
             if comment:
                 blogitem = DB.Blog.get_by_id(int(blog_id))
-                if blogitem and self.isprofane(comment):
-                    blogcommenterror = '''Error! Profane comments
-                    are not allowed..'''
-                    params = dict(title=blogitem.title,
-                                  blogtext=blogitem.blogtext,
-                                  blogcommenterror=blogcommenterror)
-                    self.render("comment.html", **params)
-                else:
-                    comment += " - " + self.User.name
-                    if blogitem:
-                        blogitem.comments.append(comment)
-                        blogitem.put()
-                        self.redirect("/blog")
+                if blogitem:
+                    if self.isprofane(comment):
+                        blogcommenterror = '''Error! Profane comments
+                        are not allowed..'''
+                        params = dict(title=blogitem.title,
+                                      blogtext=blogitem.blogtext,
+                                      blogcommenterror=blogcommenterror)
+                        self.render("comment.html", **params)
                     else:
-                        self.write("error adding comments..")
+                        commentitem = DB.BlogComments(commentid=DB.BlogComments.
+                                                      get_all().count(),
+                                                      comments=comment,
+                                                      author=self.User.name)
+                        c_key = commentitem.put()
+                        if c_key:
+                            blogitem.comments.append(commentitem.commentid)
+                            blogitem.put()
+                            self.redirect("/blog")
+                        else:
+                            self.write("Error adding comments..")
             else:
                 blogcommenterror = "Error! Provide comments.."
                 self.render("comment.html", blogcommenterror=blogcommenterror)
         else:
             self.redirect('/login')
 
+
+class BlogCommentEdit(BlogHandler):
+    """Edit comment handler for logged in author."""
+
+    def get(self, comment_id):
+        if self.User:
+            comment_to_edit = DB.BlogComments.by_name(long(comment_id))
+            if comment_to_edit:
+                self.render("commentedit.html", blogcomment=comment_to_edit.comments)
+            else:
+                self.write("error getting blog comments")
+        else:
+            self.redirect('/login')
+
+    def post(self, comment_id):
+        if self.User:
+            blogcomment = self.request.get("blogcomment")
+            if blogcomment:
+                if self.isprofane(blogcomment):
+                    blogcommenterror = '''Error! Profane comments
+                    are not allowed..'''
+                    self.render("comment.html",
+                                blogcomment=blogcomment,
+                                blogcommenterror=blogcommenterror)
+                else:
+                    commentitem = DB.BlogComments.by_name(long(comment_id))
+                    if commentitem:
+                        commentitem.comments = blogcomment
+                        c_key = commentitem.put()
+                        if c_key:
+                            self.redirect("/blog")
+                        else:
+                            self.write("Error adding comments..")
+                    else:
+                        self.write("error getting commentitem in comment edit post..")
+            else:
+                blogcommenterror = "Error! Provide comments.."
+                self.render("comment.html", blogcommenterror=blogcommenterror)
+                self.write("check 2")
+        else:
+            self.redirect('/login')
+
+
+class BlogCommentDelete(BlogHandler):
+    """Delete comment handler for logged in author."""
+
+    def post(self, comment_id):
+        if self.User:
+            blogcomment = self.request.get("blogcomment")
+            if blogcomment:
+                commentitem = DB.BlogComments.by_name(long(comment_id))
+                if commentitem:
+                    commentitem.comments = blogcomment
+                    c_key = commentitem.put()
+                    if c_key:
+                        self.redirect("/blog")
+                    else:
+                        self.write("Error adding comments..")
+                else:
+                    self.write("error getting commentitem in comment edit post..")
+            else:
+                blogcommenterror = "Error! Provide comments.."
+                self.render("comment.html", blogcommenterror=blogcommenterror)
+                self.write("check 2")
+        else:
+            self.redirect('/login')
 
 app = webapp2.WSGIApplication([('/', Login),
                                ('/blog', BlogPost),
@@ -401,5 +477,7 @@ app = webapp2.WSGIApplication([('/', Login),
                                (r'/blogdislike/(\d+)', BlogDisLike),
                                (r'/blogdelete/(\d+)', BlogDelete),
                                (r'/blogedit/(\d+)', BlogEdit),
+                               (r'/blogcomedit/(\d+)', BlogCommentEdit),
+                               (r'/blogcomdel/(\d+)', BlogCommentDelete),
                                (r'/blogcomment/(\d+)', BlogComment)],
                               debug=True)

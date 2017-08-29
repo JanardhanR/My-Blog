@@ -1,0 +1,22 @@
+ {% extends "basetemplate.html" %} {% block content %}
+<form class="form-horizontal editpost" method="post">
+    {%if blogcommenterror %}
+    <div class="col-sm-offset-2 col-sm-10">
+        <p class="error">{{blogcommenterror}}</p>
+    </div>
+    {% endif %}    
+    <div class="form-group">
+        <label for="blogtext" class="col-md-2 control-label">Comment</label>
+        <div class="col-md-8">
+            <textarea type="text" class="form-control" cols="80" rows="20" id="blogtext" placeholder="comment.." name="blogcomment">{{blogcomment}}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="col-md-offset-2 col-md-8">
+            <button type="submit" class="btn btn-default">Submit</button>
+            <a href="/blog" id="cancel" name="cancel" class="btn btn-default">Cancel</a>
+        </div>
+    </div>
+</form>
+
+{% endblock %}

@@ -118,3 +118,8 @@ text-align: center;
 .blogheadtitle {
   margin-top: 15px;
 }
+
+
+.blogcomment {
+  display: inline-flex;
+}

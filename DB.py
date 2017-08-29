@@ -60,16 +60,62 @@ class Blog(db.Model):
     created = db.DateProperty(auto_now_add=True)
     likes = db.StringListProperty()
     dislikes = db.StringListProperty()
-    comments = db.StringListProperty()
+    comments = db.ListProperty(long)
     author = db.StringProperty()
 
     @classmethod
     def get_all(cls):
         """Return all blog records."""
-        return Blog.gql("order by created desc limit 30")
+        return Blog.gql("order by created desc")
 
     @classmethod
     def delete_all(cls):
         """Delete all blog records."""
         all_recs = cls.gql("order by created desc")
         db.delete(all_recs)
+
+
+class BlogComments(db.Model):
+    """This class provides table for storing user comments."""
+
+    commentid = db.IntegerProperty(required=True)
+    author = db.StringProperty(required=True)
+    comments = db.TextProperty()
+
+    @classmethod
+    def by_id(cls, uid):
+        """Get user by id."""
+
+        return cls.get_by_id(uid, parent=users_key())
+
+    @classmethod
+    def by_commentid(cls, commentid):
+        """Get user by id."""
+        comment = cls.gql("WHERE commentid = :commentid", commentid=commentid)
+        return comment
+
+    @classmethod
+    def by_name(cls, commentid):
+        """Get user by name."""
+
+        user = cls.all().filter('commentid =', commentid).get()
+        return user
+
+
+    @classmethod
+    def get_all(cls):
+        """Return all comments records."""
+        return cls.gql("order by commentid")
+    
+    
+    @classmethod
+    def delete_by_ids(cls, ids):
+        """Return all comments records."""        
+        # rec_to_delete = cls.all().filter('commentid in',ids).get()
+        rec_to_delete = cls.gql("WHERE commentid IN :commentid", commentid=ids)
+        db.delete(rec_to_delete)
+
+    @classmethod
+    def get_count(cls):
+        """Return all comments records."""
+        return cls.gql("order by commentid").count()
