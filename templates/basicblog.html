@@ -81,8 +81,8 @@
             </div>
         </div>
         <section class="commentsection">
-            <br> {% for commentid in blogitem.comments %} {%for item in blogcomments %} {% if item.commentid == commentid
-            %}
+            <br> {% for commentid in blogitem.comments %} {%for item in blogcomments %} 
+            {% if item.commentid == commentid %}
             <div class="row comments">
                 <div class="col-md-offset-1 col-md-10">
                     <p>{{item.comments}}</p>
@@ -119,14 +119,11 @@
                                 </div>
                             </div>
                         </div>
-                    </form>
-                    <hr>
-                    <br>
-                </section>
+                    </form>                    
+                </section>                
             </div>
             {% endif %} {% endif %} {% endfor %} {% endfor %}
             <br>
-
         </section>
         {% endif %}
         <br>

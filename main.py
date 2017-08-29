@@ -384,9 +384,12 @@ class BlogComment(BlogHandler):
                                       blogcommenterror=blogcommenterror)
                         self.render("comment.html", **params)
                     else:
-                        commentitem = DB.BlogComments(commentid=DB.
-                                                      BlogComments.
-                                                      get_all().count(),
+                        com_key = DB.BlogComments.get_maxId()
+                        if com_key:
+                            com_key += 1
+                        else:
+                            com_key = 1
+                        commentitem = DB.BlogComments(com_key,
                                                       comments=comment,
                                                       author=self.User.name)
                         c_key = commentitem.put()

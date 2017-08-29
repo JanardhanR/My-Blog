@@ -75,10 +75,14 @@ class Blog(db.Model):
         db.delete(all_recs)
 
 
+def comments_key(group='default'):
+    """Returns internal key for comments ."""
+    return db.Key.from_path('BlogComments', group)
+
 class BlogComments(db.Model):
     """This class provides table for storing user comments."""
 
-    commentid = db.IntegerProperty(required=True)
+    # commentid = db.IntegerProperty(required=True)
     author = db.StringProperty(required=True)
     comments = db.TextProperty()
 
@@ -86,7 +90,7 @@ class BlogComments(db.Model):
     def by_id(cls, uid):
         """Get user by id."""
 
-        return cls.get_by_id(uid, parent=users_key())
+        return cls.get_by_id(uid, parent=comments_key())
 
     @classmethod
     def by_commentid(cls, commentid):
@@ -101,11 +105,15 @@ class BlogComments(db.Model):
         """Return all comments records."""
         return cls.gql("order by commentid")
     
-    
+    @classmethod
+    def get_maxId(cls):
+        """Return all comments records."""
+        comment = cls.select("select commentid from BlogComments ORDER BY commentid DESC RANGE 0,1").get()
+        return comment
+
     @classmethod
     def delete_by_ids(cls, ids):
-        """Return all comments records."""        
-        # rec_to_delete = cls.all().filter('commentid in',ids).get()
+        """Return all comments records."""
         rec_to_delete = cls.gql("WHERE commentid IN :commentid", commentid=ids)
         db.delete(rec_to_delete)
 
