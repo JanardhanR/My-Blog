@@ -68,8 +68,8 @@ class BlogHandler(webapp2.RequestHandler):
         """Profanity checker
          Make sure users don't enter bad words.."""
 
-        connection = urllib.urlopen("http://www.purgomalum.com/service/containsprofanity?text="
-                                    + text_to_check)
+        connection = urllib.urlopen("http://www.purgomalum.com/service/containsprofanity?text=" +
+                                    text_to_check)
         output = connection.read()
         connection.close()
         if "true" in output:
@@ -77,6 +77,7 @@ class BlogHandler(webapp2.RequestHandler):
         elif "false" in output:
             return False
         return False
+
 
 class SignUpHandler(BlogHandler):
     """Signup handler class provides base functions for the signup handling."""
@@ -132,10 +133,13 @@ class Register(SignUpHandler):
             msg = 'That user already exists.'
             self.render('usersignup.html', usererror=msg)
         else:
-            currentuser = DB.User.register(self.username, self.password, self.email)
+            currentuser = DB.User.register(self.username,
+                                           self.password,
+                                           self.email)
             currentuser.put()
             self.login(currentuser)
             self.redirect('/blog')
+
 
 class Login(BlogHandler):
     """Login class provides login function handling."""
@@ -158,12 +162,14 @@ class Login(BlogHandler):
             msg = 'Invalid userid or password'
             self.render('login.html', error=msg)
 
+
 class Logout(BlogHandler):
     """Logout class provides logout function handling."""
 
     def get(self):
         self.logout()
         self.redirect('/login')
+
 
 class NewPost(BlogHandler):
     """Provides functions for adding new post to blog."""
@@ -182,10 +188,13 @@ class NewPost(BlogHandler):
 
             if title and blogtext:
                 if self.isprofane(title) or self.isprofane(blogtext):
-                    blogerror = "Error! Profane title or content is not allowed.."
+                    blogerror = '''Error! Profane
+                    title or content is not allowed..'''
                     self.render("newpost.html", blogerror=blogerror)
                 else:
-                    blogitem = DB.Blog(title=title, blogtext=blogtext, author=self.User.name)
+                    blogitem = DB.Blog(title=title,
+                                       blogtext=blogtext,
+                                       author=self.User.name)
                     b_key = blogitem.put()
                     self.redirect("/blog/%d" % b_key.id())
             else:
@@ -195,8 +204,10 @@ class NewPost(BlogHandler):
             self.logout()
             self.redirect('/login')
 
+
 class BlogPost(BlogHandler):
-    """Just shows all the blog pages, or redirects to login if user is not logged in and
+    """Just shows all the blog pages, or redirects
+    to login if user is not logged in and
     attempts to change anything."""
 
     def get(self):
@@ -211,21 +222,26 @@ class BlogPost(BlogHandler):
 
 
 class Permalink(BlogHandler):
-    """Shows a preview of new post before being showing them in list of blogs."""
+    """Shows a preview of new post before being
+    showing them in list of blogs."""
 
     def get(self, blog_id):
         blogitem = DB.Blog.get_by_id(int(blog_id))
         # Checking to make sure blogitem exists
         if blogitem and self.User:
-            self.render("blogitem.html", title=blogitem.title, blogtext=blogitem.blogtext)
+            self.render("blogitem.html",
+                        title=blogitem.title,
+                        blogtext=blogitem.blogtext)
         else:
             self.logout()
             self.redirect('/login')
 
+
 class BlogLike(BlogHandler):
     """Like handler."""
     def get(self, blog_id):
-        """we'll redirect to login page for any unauthorized bloglike request.."""
+        """we'll redirect to login page for any
+        unauthorized bloglike request.."""
         if self.User:
             self.logout()
         self.redirect('/login')
@@ -233,22 +249,26 @@ class BlogLike(BlogHandler):
     def post(self, blog_id):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
-            # Changed from if blogitem (C style check for not null to "is not None")
+            '# Changed from if blogitem'
+            '#(C style check for not null to "is not None")'
             if blogitem is not None:
                 # make sure author is not liking his own posts..
-                if self.User.name != blogitem.author and self.User.name not in blogitem.likes and \
+                if self.User.name != blogitem.author and \
+                self.User.name not in blogitem.likes and \
                 self.User.name not in blogitem.dislikes:
                     blogitem.likes.append(self.User.name)
                     blogitem = blogitem.put()
 
-        #Redirect to /blog by default to cause a refresh.
+        'Redirect to /blog by default to cause a refresh.'
         self.redirect("/blog")
+
 
 class BlogDisLike(BlogHandler):
     """Dislike handler."""
 
     def get(self, blog_id):
-        """we'll redirect to login page for any unauthorized blogdislike request.."""
+        """we'll redirect to login page for
+        any unauthorized blogdislike request.."""
         if self.User:
             self.logout()
         self.redirect('/login')
@@ -260,8 +280,9 @@ class BlogDisLike(BlogHandler):
             self.User.name not in blogitem.dislikes:
                 blogitem.dislikes.append(self.User.name)
                 blogitem = blogitem.put()
-        #Redirect to /blog by default to cause a refresh.
+        '#Redirect to /blog by default to cause a refresh.'
         self.redirect("/blog")
+
 
 class BlogDelete(BlogHandler):
     """Delete blog handler for logged in user."""
@@ -271,8 +292,9 @@ class BlogDelete(BlogHandler):
             blogitem = DB.Blog.get_by_id(int(blog_id))
             if blogitem and self.User.name == blogitem.author:
                 blogitem.delete()
-        #Redirect to /blog by default to cause a refresh.
+        '# Redirect to /blog by default to cause a refresh.'
         self.redirect("/blog")
+
 
 class BlogEdit(BlogHandler):
     """Edit blog handler for logged in author."""
@@ -296,9 +318,13 @@ class BlogEdit(BlogHandler):
 
             if title and blogtext:
                 if self.isprofane(title) or self.isprofane(blogtext):
-                    #Make sure no profanity is accepted even during blog edit..
-                    blogerror = "Error! Profane title or content is not allowed.."
-                    params = dict(title=title, blogtext=blogtext, blogerror=blogerror)
+                    '''Make sure no profanity is accepted even
+                    during blog edit..'''
+                    blogerror = '''Error! Profane title
+                    or content is not allowed..'''
+                    params = dict(title=title,
+                                  blogtext=blogtext,
+                                  blogerror=blogerror)
                     self.render("editpost.html", **params)
                 else:
                     blogitem = DB.Blog.get_by_id(int(blog_id))
@@ -311,13 +337,16 @@ class BlogEdit(BlogHandler):
                 blogitem = DB.Blog.get_by_id(int(blog_id))
                 if blogitem:
                     blogerror = "Error! Provide Title and blog text.."
-                    params = dict(title=blogitem.title, blogtext=blogitem.blogtext, blogerror=blogerror)
+                    params = dict(title=blogitem.title,
+                                  blogtext=blogitem.blogtext,
+                                  blogerror=blogerror)
                     self.render("editpost.html", **params)
                 else:
                     # write error so that we catch any new scenario
                     self.write("unknown error during edit...")
         else:
             self.redirect('/login')
+
 
 class BlogComment(BlogHandler):
     """Comment on blog handler, only for user other than author."""
@@ -326,13 +355,13 @@ class BlogComment(BlogHandler):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
             if blogitem:
-                params = dict(title=blogitem.title, blogtext=blogitem.blogtext)
+                params = dict(title=blogitem.title,
+                              blogtext=blogitem.blogtext)
                 self.render("comment.html", **params)
             else:
                 self.write("error")
         else:
             self.redirect('/login')
-
 
     def post(self, blog_id):
         if self.User:
@@ -340,9 +369,11 @@ class BlogComment(BlogHandler):
             if comment:
                 blogitem = DB.Blog.get_by_id(int(blog_id))
                 if blogitem and self.isprofane(comment):
-                    blogcommenterror = "Error! Profane comments are not allowed.."
-                    params = dict(title=blogitem.title, blogtext=blogitem.blogtext, \
-                    blogcommenterror=blogcommenterror)
+                    blogcommenterror = '''Error! Profane comments
+                    are not allowed..'''
+                    params = dict(title=blogitem.title,
+                                  blogtext=blogitem.blogtext,
+                                  blogcommenterror=blogcommenterror)
                     self.render("comment.html", **params)
                 else:
                     comment += " - " + self.User.name
@@ -370,4 +401,5 @@ app = webapp2.WSGIApplication([('/', Login),
                                (r'/blogdislike/(\d+)', BlogDisLike),
                                (r'/blogdelete/(\d+)', BlogDelete),
                                (r'/blogedit/(\d+)', BlogEdit),
-                               (r'/blogcomment/(\d+)', BlogComment)], debug=True)
+                               (r'/blogcomment/(\d+)', BlogComment)],
+                              debug=True)
