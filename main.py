@@ -8,7 +8,7 @@ import webapp2
 import auth
 import DB
 
-STRONG_NAME_KEY = 'jana'
+STRONG_NAME_KEY = 'aghkZXZ-Tm9uZXIRCxIEQmxvZxiAgICAgMyhCAw'
 
 '# setup template and jinja2 environment'
 TEMPLATE_DIR = os.path.join(os.path.dirname(__file__), 'templates')
@@ -245,12 +245,6 @@ class Permalink(BlogHandler):
 
 class BlogLike(BlogHandler):
     """Like handler."""
-    def get(self, blog_id):
-        """we'll redirect to login page for any
-        unauthorized bloglike request.."""
-        if self.User:
-            self.logout()
-        self.redirect('/login')
 
     def post(self, blog_id):
         if self.User:
@@ -271,13 +265,6 @@ class BlogLike(BlogHandler):
 
 class BlogDisLike(BlogHandler):
     """Dislike handler."""
-
-    def get(self, blog_id):
-        """we'll redirect to login page for
-        any unauthorized blogdislike request.."""
-        if self.User:
-            self.logout()
-        self.redirect('/login')
 
     def post(self, blog_id):
         if self.User:
@@ -384,17 +371,11 @@ class BlogComment(BlogHandler):
                                       blogcommenterror=blogcommenterror)
                         self.render("comment.html", **params)
                     else:
-                        com_key = DB.BlogComments.get_maxId()
-                        if com_key:
-                            com_key += 1
-                        else:
-                            com_key = 1
-                        commentitem = DB.BlogComments(com_key,
-                                                      comments=comment,
+                        commentitem = DB.BlogComments(comments=comment,
                                                       author=self.User.name)
                         c_key = commentitem.put()
                         if c_key:
-                            blogitem.comments.append(commentitem.commentid)
+                            blogitem.comments.append(c_key.id())
                             blogitem.put()
                             self.redirect("/blog")
                         else:
@@ -411,7 +392,7 @@ class BlogCommentEdit(BlogHandler):
 
     def get(self, comment_id):
         if self.User:
-            comment_to_edit = DB.BlogComments.by_commentid(long(comment_id))
+            comment_to_edit = DB.BlogComments.by_id(long(comment_id))
             if comment_to_edit:
                 self.render("commentedit.html",
                             blogcomment=comment_to_edit.comments)
@@ -431,7 +412,7 @@ class BlogCommentEdit(BlogHandler):
                                 blogcomment=blogcomment,
                                 blogcommenterror=blogcommenterror)
                 else:
-                    commentitem = DB.BlogComments.by_commentid(long(comment_id))
+                    commentitem = DB.BlogComments.by_id(long(comment_id))
                     if commentitem:
                         commentitem.comments = blogcomment
                         c_key = commentitem.put()
@@ -457,9 +438,9 @@ class BlogCommentDelete(BlogHandler):
         if self.User:
             blogitem = DB.Blog.get_by_id(int(blog_id))
             if blogitem:
-                commentitem = DB.BlogComments.by_commentid(long(comment_id))
+                commentitem = DB.BlogComments.by_id(long(comment_id))
                 if commentitem and self.User.name == commentitem.author:
-                    blogitem.comments.remove(commentitem.commentid)
+                    blogitem.comments.remove(commentitem.key().id())
                     blogitem.put()
                     commentitem.delete()
                 else:

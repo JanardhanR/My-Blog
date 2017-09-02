@@ -89,27 +89,12 @@ class BlogComments(db.Model):
     @classmethod
     def by_id(cls, uid):
         """Get user by id."""
-
-        return cls.get_by_id(uid, parent=comments_key())
-
-    @classmethod
-    def by_commentid(cls, commentid):
-        """Get user by name."""
-
-        user = cls.all().filter('commentid =', commentid).get()
-        return user
-
+        return cls.get_by_id(uid)
 
     @classmethod
     def get_all(cls):
         """Return all comments records."""
-        return cls.gql("order by commentid")
-    
-    @classmethod
-    def get_maxId(cls):
-        """Return all comments records."""
-        comment = cls.select("select commentid from BlogComments ORDER BY commentid DESC RANGE 0,1").get()
-        return comment
+        return cls.all()
 
     @classmethod
     def delete_by_ids(cls, ids):
