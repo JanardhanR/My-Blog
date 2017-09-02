@@ -29,5 +29,8 @@ How to install the dependencies and run the app locally(Windows)
     4. Navigate to path where main.py is present(...\My-Blog).   
         Start deployment by running below command.  Please note the "." which is required and denotes
         current directory as shown below.
-        
+
             E:\My-Blog> dev_appserver.py .
+            
+    5. Navigate to http://localhost:8080/ to open the login page
+    6. Navigate to http://localhost:8000/datastore to open the datastore where users/blog entries/blog comments are stored.
