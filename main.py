@@ -368,6 +368,7 @@ class BlogComment(BlogHandler):
                         are not allowed..'''
                         params = dict(title=blogitem.title,
                                       blogtext=blogitem.blogtext,
+                                      blogcomment=comment,
                                       blogcommenterror=blogcommenterror)
                         self.render("comment.html", **params)
                     else:
@@ -394,7 +395,7 @@ class BlogCommentEdit(BlogHandler):
         if self.User:
             comment_to_edit = DB.BlogComments.by_id(long(comment_id))
             if comment_to_edit:
-                self.render("commentedit.html",
+                self.render("commentEdit.html",
                             blogcomment=comment_to_edit.comments)
             else:
                 self.write("error getting blog comments")

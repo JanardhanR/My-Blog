@@ -79,6 +79,7 @@ def comments_key(group='default'):
     """Returns internal key for comments ."""
     return db.Key.from_path('BlogComments', group)
 
+
 class BlogComments(db.Model):
     """This class provides table for storing user comments."""
 
@@ -99,8 +100,8 @@ class BlogComments(db.Model):
     @classmethod
     def delete_by_ids(cls, ids):
         """Return all comments records."""
-        rec_to_delete = cls.gql("WHERE commentid IN :commentid", commentid=ids)
-        db.delete(rec_to_delete)
+        for rec_id in ids:
+            db.delete(cls.by_id(rec_id))
 
     @classmethod
     def get_count(cls):

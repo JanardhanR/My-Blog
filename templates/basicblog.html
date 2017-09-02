@@ -49,11 +49,11 @@
                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"> Edit</span>
                     </button>
                 </form>
-                <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#DelBlogModel">
+                <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#DelBlogModel{{blogitem.key()}}">
                         <span class="glyphicon glyphicon-trash" aria-hidden="true"> Delete</span>
                 </button>
                 <form action="/blogdelete/{{blogitem.key().id()}}" method="post">
-                    <div class="modal fade" id="DelBlogModel" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal fade" id="DelBlogModel{{blogitem.key()}}" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
@@ -81,8 +81,11 @@
             </div>
         </div>
         <section class="commentsection">
-            <br> {% for commentid in blogitem.comments %} {%for item in blogcomments %} 
-            {% if item.commentid == commentid %}
+            <br>
+            
+            {% for commentitem in blogitem.comments %}
+            {% for item in blogcomments %}             
+            {% if item.key().id() == commentitem %}
             <div class="row comments">
                 <div class="col-md-offset-1 col-md-10">
                     <p>{{item.comments}}</p>
@@ -93,16 +96,16 @@
             {% if item.author == author %}
             <div class="row">
                 <section class="col-md-offset-8 col-md-4 blogitemfooter">
-                    <form action="/blogcomedit/{{item.commentid}}" method="get">
+                    <form action="/blogcomedit/{{item.key().id()}}" method="get">
                         <button type="submit" class="btn btn-default" aria-label="Left Align">
                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"> Edit </span>
                         </button>
                     </form>
-                    <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#DelComModel{{item.commentid}}">
+                    <button type="button" class="btn btn-default" aria-label="Left Align" data-toggle="modal" data-target="#DelComModel{{item.key().id()}}">
                                 <span class="glyphicon glyphicon-trash" aria-hidden="true"> Delete</span>
-                        </button>
-                    <form action="/blogcomdel/{{blogitem.key().id()}}/{{item.commentid}}" method="post">
-                        <div class="modal fade" id="DelComModel{{item.commentid}}" tabindex="-1" role="dialog" aria-labelledby="delete">
+                    </button>
+                    <form action="/blogcomdel/{{blogitem.key().id()}}/{{item.key().id()}}" method="post">
+                        <div class="modal fade" id="DelComModel{{item.key().id()}}" tabindex="-1" role="dialog" aria-labelledby="delete">
                             <div class="modal-dialog" role="document">
                                 <div class="modal-content">
                                     <div class="modal-header">

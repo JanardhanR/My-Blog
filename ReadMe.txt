@@ -15,7 +15,7 @@ How to open/run the Blog
     3. Signup for a new user or Login using the below userid/passwords to login and try out newpost/comment/edit/like/dislike.
     a.  username -> jana , password -> jana
     b.  username -> banu , password -> banu
-    b.  username -> oppo , password -> oppo
+    b.  username -> chitti , password -> chitti
 
 How to install the dependencies and run the app locally(Windows)
     Follow the below instructions to download from github and deploy it locally
