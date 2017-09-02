@@ -18,3 +18,16 @@ How to open/run the Blog
    b.  username -> banu , password -> banu
    b.  username -> oppo , password -> oppo
 
+How to install the dependencies and run the app locally(Windows)
+    Follow the below instructions to download from github and deploy it locally
+    
+    1. Follow instructions listed in https://cloud.google.com/appengine/docs/standard/python/quickstart
+       for installing and configuring Google App Engine
+    2. Follow instructions listed in https://cloud.google.com/sdk/docs/#windows for installing up
+       the GCould SDK
+    3. Download the source from https://github.com/JanardhanR/My-Blog
+    4. Navigate to path where main.py is present(...\My-Blog).   
+        Start deployment by running below command.  Please note the "." which is required and denotes
+        current directory as shown below.
+        
+            E:\My-Blog> dev_appserver.py .
