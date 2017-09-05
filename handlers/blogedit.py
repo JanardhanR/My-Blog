@@ -8,7 +8,7 @@ class BlogEdit(BlogHandler):
     def get(self, blog_id):
         if self.User:
             blogitem = Blog.get_by_id(int(blog_id))
-            if blogitem and blogitem.author == self.User.name:
+            if blogitem and blogitem.author.name == self.User.name:
                 params = dict(title=blogitem.title, blogtext=blogitem.blogtext)
                 self.render("editpost.html", **params)
             else:
@@ -34,7 +34,7 @@ class BlogEdit(BlogHandler):
                     self.render("editpost.html", **params)
                 else:
                     blogitem = Blog.get_by_id(int(blog_id))
-                    if blogitem and blogitem.author == self.User.name:
+                    if blogitem and blogitem.author.name == self.User.name:
                         blogitem.title = title
                         blogitem.blogtext = blogtext
                         b_key = blogitem.put()

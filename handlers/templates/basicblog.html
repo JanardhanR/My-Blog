@@ -21,13 +21,13 @@
         <div class="row">
             <div class="col-md-offset-2 col-md-10">
                 {% if blogitem.author: %}
-                <p class="blog-date">Posted by : {{blogitem.author}} on {{blogitem.created}}</p>
+                <p class="blog-date">Posted by : {{blogitem.author.name}} on {{blogitem.created}}</p>
                 {% endif %}
             </div>
         </div>
         <footer class="row">
             <section class="col-md-offset-8 col-md-4 blogitemfooter">
-                {% if blogitem.author != author: %}
+                {% if blogitem.author.name != author: %}
                 <form action="/bloglike/{{blogitem.key().id()}}" method="post">
                     <button type="submit" class="btn btn-default" aria-label="Left Align">
                             <span class="glyphicon glyphicon-thumbs-up" aria-hidden="true"> {{ blogitem.likes |length() }}</span>
@@ -43,7 +43,7 @@
                         <span class="glyphicon glyphicon-comment" aria-hidden="true"> Comment</span>
                     </button>
                 </form>
-                {% endif %} {% if blogitem.author == author: %}
+                {% endif %} {% if blogitem.author.name == author: %}
                 <form action="/blogedit/{{blogitem.key().id()}}" method="get">
                     <button type="submit" class="btn btn-default" aria-label="Left Align">
                         <span class="glyphicon glyphicon-pencil" aria-hidden="true"> Edit</span>
@@ -89,11 +89,11 @@
             <div class="row comments">
                 <div class="col-md-offset-1 col-md-10">
                     <p>{{item.comments}}</p>
-                    <p class="blog-date"> - {{item.author}}</p>
+                    <p class="blog-date"> - {{item.author.name}}</p>
                     <br>
                 </div>
             </div>
-            {% if item.author == author %}
+            {% if item.author.name == author %}
             <div class="row">
                 <section class="col-md-offset-8 col-md-4 blogitemfooter">
                     <form action="/blogcomedit/{{item.key().id()}}" method="get">

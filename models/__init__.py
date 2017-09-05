@@ -1,6 +1,6 @@
 '''init file for models module'''
 
-from auth import AuthCred
-from blog import Blog
-from comment import BlogComments
-from users import User
+from models.auth import AuthCred
+from models.blog import Blog
+from models.comment import BlogComments
+from models.users import User

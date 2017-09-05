@@ -34,7 +34,7 @@ class BlogComment(BlogHandler):
                         self.render("comment.html", **params)
                     else:
                         commentitem = BlogComments(comments=user_comment,
-                                                           author=self.User.name)
+                                                   author=self.User)
                         c_key = commentitem.put()
                         if c_key:
                             blogitem.comments.append(c_key.id())

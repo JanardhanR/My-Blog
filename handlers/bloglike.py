@@ -12,7 +12,7 @@ class BlogLike(BlogHandler):
             '#(C style check for not null to "is not None")'
             if blogitem is not None:
                 # make sure author is not liking his own posts..
-                if self.User.name != blogitem.author and \
+                if self.User.name != blogitem.author.name and \
                 self.User.name not in blogitem.likes and \
                 self.User.name not in blogitem.dislikes:
                     blogitem.likes.append(self.User.name)

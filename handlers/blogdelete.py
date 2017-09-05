@@ -9,7 +9,7 @@ class BlogDelete(BlogHandler):
     def post(self, blog_id):
         if self.User:
             blogitem = Blog.get_by_id(int(blog_id))
-            if blogitem and self.User.name == blogitem.author:
+            if blogitem and self.User.name == blogitem.author.name:
                 BlogComments.delete_by_ids(blogitem.comments)
                 blogitem.delete()
         # Redirect to /blog by default to cause a refresh.

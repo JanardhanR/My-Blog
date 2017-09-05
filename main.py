@@ -16,18 +16,18 @@ from handlers import Logout
 from handlers import Permalink
 
 
-app = webapp2.WSGIApplication([('/', Login),
-                               ('/blog', BlogPost),
-                               ('/signup', Register),
-                               ('/login', Login),
-                               ('/logout', Logout),
-                               ('/newpost', NewPost),
-                               (r'/blog/(\d+)', Permalink),
-                               (r'/bloglike/(\d+)', BlogLike),
-                               (r'/blogdislike/(\d+)', BlogDisLike),
-                               (r'/blogdelete/(\d+)', BlogDelete),
-                               (r'/blogedit/(\d+)', BlogEdit),
-                               (r'/blogcomedit/(\d+)', BlogCommentEdit),
-                               (r'/blogcomdel/(\d+)/(\d+)', BlogCommentDelete),
-                               (r'/blogcomment/(\d+)', BlogComment)],
-                              debug=True)
+BLOG_APP = webapp2.WSGIApplication([('/', Login),
+                                    ('/blog', BlogPost),
+                                    ('/signup', Register),
+                                    ('/login', Login),
+                                    ('/logout', Logout),
+                                    ('/newpost', NewPost),
+                                    (r'/blog/(\d+)', Permalink),
+                                    (r'/bloglike/(\d+)', BlogLike),
+                                    (r'/blogdislike/(\d+)', BlogDisLike),
+                                    (r'/blogdelete/(\d+)', BlogDelete),
+                                    (r'/blogedit/(\d+)', BlogEdit),
+                                    (r'/blogcomedit/(\d+)', BlogCommentEdit),
+                                    (r'/blogcomdel/(\d+)/(\d+)', BlogCommentDelete),
+                                    (r'/blogcomment/(\d+)', BlogComment)],
+                                   debug=True)

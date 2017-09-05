@@ -15,8 +15,8 @@ class Register(SignUpHandler):
             self.render('usersignup.html', usererror=msg)
         else:
             currentuser = User.register(self.username,
-                                              self.password,
-                                              self.email)
+                                        self.password,
+                                        self.email)
             currentuser.put()
             self.login(currentuser)
             self.redirect('/blog')

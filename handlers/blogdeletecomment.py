@@ -11,7 +11,7 @@ class BlogCommentDelete(BlogHandler):
             blogitem = Blog.get_by_id(int(blog_id))
             if blogitem:
                 commentitem = BlogComments.by_id(long(comment_id))
-                if commentitem and self.User.name == commentitem.author:
+                if commentitem and self.User.name == commentitem.author.name:
                     blogitem.comments.remove(commentitem.key().id())
                     blogitem.put()
                     commentitem.delete()

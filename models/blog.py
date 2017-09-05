@@ -1,6 +1,7 @@
 """This module provides Blog table handling classes."""
 
 from google.appengine.ext import db
+from models.users import User
 
 class Blog(db.Model):
     """This class provides table for storing blog attributes such as title, blogtext etc."""
@@ -11,7 +12,7 @@ class Blog(db.Model):
     likes = db.StringListProperty()
     dislikes = db.StringListProperty()
     comments = db.ListProperty(long)
-    author = db.StringProperty()
+    author = db.ReferenceProperty(User, collection_name='blog_posts')
 
     @classmethod
     def get_all(cls):
@@ -23,9 +24,3 @@ class Blog(db.Model):
         """Delete all blog records."""
         all_recs = cls.gql("order by created desc")
         db.delete(all_recs)
-
-
-def comments_key(group='default'):
-    """Returns internal key for comments ."""
-    return db.Key.from_path('BlogComments', group)
-

@@ -1,7 +1,7 @@
 """This module provides User table handling classes."""
 
 from google.appengine.ext import db
-from auth import valid_pw, make_pw_hash
+from models.auth import valid_pw, make_pw_hash
 
 def users_key(group='default'):
     """Returns internal key for user ."""

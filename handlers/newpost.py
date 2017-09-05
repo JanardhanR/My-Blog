@@ -27,8 +27,8 @@ class NewPost(BlogHandler):
                                 blogerror=blogerror)
                 else:
                     blogitem = Blog(title=title,
-                                         blogtext=blogtext,
-                                         author=self.User.name)
+                                    blogtext=blogtext,
+                                    author=self.User)
                     b_key = blogitem.put()
                     self.redirect("/blog/%d" % b_key.id())
             else:

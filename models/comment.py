@@ -1,11 +1,15 @@
 """This module provides Blog comments table handling classes."""
 from google.appengine.ext import db
+from models.users import User
+
+def comments_key(group='default'):
+    """Returns internal key for comments ."""
+    return db.Key.from_path('BlogComments', group)
 
 class BlogComments(db.Model):
     """This class provides table for storing user comments."""
 
-    # commentid = db.IntegerProperty(required=True)
-    author = db.StringProperty(required=True)
+    author = db.ReferenceProperty(User, collection_name='blog_comments')
     comments = db.TextProperty()
 
     @classmethod
